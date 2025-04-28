@@ -1,0 +1,4 @@
+
+TEST_LANG = \
+	test/lang/Array.c \
+	test/lang/Object.c

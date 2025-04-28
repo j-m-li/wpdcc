@@ -1,0 +1,8 @@
+
+include src/lang/makeinclude
+include src/io/makeinclude
+include src/test/makeinclude
+include src/cc/makeinclude
+include src/win32/makeinclude
+
+SRC = $(SRC_LANG) $(SRC_IO) $(SRC_TEST) $(SRC_CC) $(SRC_WIN32)

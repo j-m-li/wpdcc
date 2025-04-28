@@ -1,0 +1,9 @@
+c5 (0.0.1-0) oksid; urgency=low
+
+  * initial
+ 
+ -- Jean-Marc Lienher <oksid@bluewin.ch>  Fri, 07 Aug 2009 19:04:09 +0200 
+
+Local variables:
+mode: debian-changelog
+End:

@@ -1,0 +1,15 @@
+
+SRC_LANG = \
+	src/lang/Array.c \
+	src/lang/Object.c \
+	src/lang/String.c \
+	src/lang/Exception.c \
+	src/lang/Gc.c \
+	src/lang/Buffer.c \
+	src/lang/Hash.c \
+	src/lang/Stack.c
+
+
+
+
+

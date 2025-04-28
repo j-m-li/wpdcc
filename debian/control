@@ -1,0 +1,39 @@
+Source: c5
+Section: otherosfs
+Priority: optional
+Maintainer: Jean-Marc Lienher <oksid@bluewin.ch>
+Uploaders: Jean-Marc Lienher <oksid@bluewin.ch>
+Build-Depends: debhelper (>= 5.0.0), 
+ wine-dev
+Standards-Version: 3.7.3
+
+Package: c5
+Architecture: any
+Pre-Depends: dpkg (>= 1.14.12ubuntu3)
+Depends: procps, binfmt-support (>= 1.1.2), ${shlibs:Depends}
+Recommends: ttf-liberation, winbind, wine-gecko
+Suggests: msttcorefonts, xdg-utils
+Conflicts: 
+Replaces: 
+Description: The public domain C compiler 
+ C compiler.
+ .
+ You can compile C programs.
+ .
+  Homepage: http://www.whoow.org/
+
+Package: c5-dev
+Architecture: any
+Section: libdevel
+Pre-Depends: dpkg (>= 1.14.12ubuntu3)
+Depends: c5 (= ${binary:Version}), libc6-dev
+Conflicts: 
+Replaces: 
+Description: The public domain C compiler (Development files)
+ C compiler.
+ .
+ C5.
+ .
+  Homepage: http://www.whoow.org/
+
+

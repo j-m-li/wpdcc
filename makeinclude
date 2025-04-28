@@ -1,0 +1,28 @@
+
+MAKE		= make
+CC		= gcc 
+RM		= rm -f  
+
+OPTIM		= -g -O2
+CFLAGS		= $(OPTIM) -D_REENTRANT -Wall -fPIC
+LDFLAGS		= $(OPTIM) -D_REENTRANT -fPIC
+LDLIBS		= 
+EXEEXT		= .exe
+
+LIBNAME		= c5.dll.so
+LIBCOMMAND	= gcc -shared -g -fPIC -D_REENTRANT  bin/libc5.def -o
+#LIBCOMMAND	= ld  -m elf_i386  -L/usr/lib32/   -lc -lm -r -o 
+
+OBJ		= .o
+
+# Be quiet when building...
+#.SILENT:
+
+# Build commands and filename extensions...
+.SUFFIXES:	.c $(OBJ)
+
+.c$(OBJ):
+	echo Compiling $<...
+	$(CC) -I./include -I/mingw/include $(CFLAGS) -c $< -o$@
+
+

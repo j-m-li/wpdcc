@@ -1,0 +1,12 @@
+
+SRC_CC = \
+	src/cc/PreExpression.c \
+	src/cc/PreProcessor.c \
+	src/cc/Parser.c \
+	src/cc/PreIncludeFiles.c \
+	src/cc/PreMacro.c\
+	src/cc/PreMacroReplaced.c \
+	src/cc/PreMacros.c \
+	src/cc/Env.c \
+	src/cc/PreTokens.c
+

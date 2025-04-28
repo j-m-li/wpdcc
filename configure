@@ -1,0 +1,3 @@
+chmod +x configure
+chmod +x debian/rulesdebian/rules
+echo ok > config.status
