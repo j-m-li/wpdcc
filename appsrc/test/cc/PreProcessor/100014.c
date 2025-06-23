@@ -1,2 +1,0 @@
-#ifndef ((def)
-#endif

@@ -1,6 +1,0 @@
-
-include test/cc/makeinclude
-#include test/lang/makeinclude
-#include test/io/makeinclude
-
-TEST = $(TEST_CC) $(TEST_LANG) $(TEST_IO) test/main.c

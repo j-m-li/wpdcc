@@ -1,1 +1,0 @@
-#define m(,b) a b

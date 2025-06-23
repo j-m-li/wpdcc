@@ -1,4 +1,0 @@
-
-SRC_WIN32 = \
-	src/win32/windows.c \
-

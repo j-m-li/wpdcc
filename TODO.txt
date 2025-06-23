@@ -1,8 +1,0 @@
-﻿
-- improve existing code
-- parser/semantic analyser
-- basic bloc construction
-- 3 addresses code generation
-- optimization
-- x86 code emmiter
-- PE/coff linker

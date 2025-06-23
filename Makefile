@@ -1,60 +1,71 @@
+SNAP=	20161212
+REL=	20210227
+ARC=	subc-$(SNAP).tgz
+DIST=	subc-$(REL).tgz
 
-include makeinclude
-include src/makeinclude
-include test/makeinclude
-include cl/makeinclude
+OS := $(shell uname -s)
+ifeq ($(OS),Darwin)
+	TAROPTS= --no-mac-metadata
+endif
 
-CFILES = $(SRC)
-OBJECTS = $(CFILES:.c=$(OBJ))
-TCFILES = $(TEST)
-TOBJECTS = $(TCFILES:.c=$(OBJ))
-CLCFILES = $(CL)
-CLOBJECTS = $(CLCFILES:.c=$(OBJ))
+SUM= cksum
 
-all: $(OBJECTS) bin/$(LIBNAME) $(TOBJECTS) bin/test$(EXEEXT) bin/cl$(EXEEXT)
+default:
+	@echo "Use 'make configure' followed by 'make install' to build and install scc."
 
-bin/$(LIBNAME): $(OBJECTS)
-	$(LIBCOMMAND)$@ $(OBJECTS) 
+configure: clean
+	./configure -m i386 -s Linux
 
-bin/test$(EXEEXT): $(TOBJECTS) $(OBJECTS)
-	$(CC) $(LDFLAGS) -mconsole -obin/test$(EXEEXT) $(LDLIBS) \
-		-Wb-E,bin/libtest.exe.def \
-		$(TOBJECTS) $(OBJECTS)  
+all:
+	cd src && make all
 
-bin/cl$(EXEEXT): $(CLOBJECTS) bin/$(LIBNAME)
-	$(CC) $(LDFLAGS) -mconsole -obin/cl$(EXEEXT) $(LDLIBS) \
-		$(CLOBJECTS) \
-		$(OBJECTS) 
+install: all
+	cd src && make install
 
+tests: all
+	cd src && make tests
+
+csums:	clean
+	sort -k 3 _sums > _oldsums
+	find . -type f | grep -v .git | grep -v .idea | grep -v sums | sort | xargs $(SUM) >_newsums
+	diff -w _oldsums _newsums || true ; rm _oldsums _newsums
+
+sums:	clean
+	find . -type f | grep -v .git | grep -v .idea | grep -v sums | sort | xargs $(SUM) >_sums
+
+version:
+	vi src/defs.h Makefile Changes
 
 clean:
-	$(RM) bin/*.exe
-	$(RM) bin/cl
-	$(RM) bin/test
-	$(RM) bin/*.so
-	$(RM) cl/*~
-	$(RM) test/*~
-	$(RM) include/cc/*~
-	$(RM) include/io/*~
-	$(RM) include/lang/*~
-	$(RM) include/test/*~
-	$(RM) include/win32/*~
-	$(RM) include/gfx/*~
-	$(RM) src/cc/*~
-	$(RM) src/io/*~
-	$(RM) src/lang/*~
-	$(RM) src/test/*~
-	$(RM) src/win32/*~
-	$(RM) src/gfx/*~
-	$(RM) $(OBJECTS)
-	$(RM) $(TOBJECTS)
-	$(RM) vc80.idb
+	cd src && make clean
+	rm -f tests/ptest.c $(ARC) $(DIST)
+	rm -f tests/ptest tests/systest tests/libtest
+	if [ -f src/Makefile.ORIG ]; then \
+		mv -f src/Makefile.ORIG src/Makefile; \
+	fi
 
-distclean: clean
-	$(RM) config.status
-	$(RM) build-stamp
+arc:	clean
+	tar cvfz $(ARC) *
 
-depend:
+dist:	clean
+	(cd .. && tar -cvz -f $(DIST) \
+		--numeric-owner --no-acls $(TAROPTS) \
+		--exclude .git \
+		--exclude .gitignore \
+		--exclude .idea \
+		--exclude _newsums \
+		--exclude src/cg.c \
+                --exclude src/cg.h \
+                --exclude src/sys.h \
+                --exclude src/include/limits.h \
+                --exclude src/lib/crt0.s \
+                --exclude src/lib/init.c \
+                --exclude src/lib/ncrt0.s \
+                --exclude src/lib/system.c \
+		subc) && mv ../$(DIST) .
 
-install:
+docker-build:
+	docker build . -t subc
 
+docker-run:
+	docker run --mount src="`pwd`",target=/usr/src/subc,type=bind -it subc
