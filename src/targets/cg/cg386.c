@@ -119,6 +119,8 @@ void cgpush(void)	{ gen("pushl\t%eax"); }
 void cgpushlit(int n)	{ ngen("%s\t$%d", "pushl", n); }
 void cgpop2(void)	{ gen("popl\t%ecx"); }
 void cgswap(void)	{ gen("xchgl\t%eax,%ecx"); }
+void cgswap3(int d)	{ if (d) gen("movl\t%eax,-4(%ebp)");
+			  else gen("movl\t-4(%ebp),%eax"); }
 
 void cgand(void)	{ cgsynth("andl"); }
 void cgior(void)	{ cgsynth("orl"); }
@@ -275,9 +277,11 @@ void cgentry(char *s)	{ genraw(s);
 			  genraw(":");
 			  gen("pushl\t%ebp");
 			  gen("movl\t%esp,%ebp");
-			  sgen("%s\t$Const%s,%%esp", "addl", s);}
+			  sgen("%s\t$Const%s,%%esp", "addl", s);
+			}
 void cgset(char *s, int n) 	{ ngen(".set Const%s,%d", s, n); }
-void cgexit(void)	{ gen("popl\t%ebp");
+void cgexit(void)	{
+			  gen("popl\t%ebp");
 			  gen("ret"); }
 
 void cgdefb(int v)	{ ngen("%s\t%d", ".byte", v); }

@@ -9,6 +9,7 @@
 #include "cgen.h"
 
 int	Acc = 0;
+int	Spil = 0;
 
 void clear(int q) {
 	Acc = 0;
@@ -17,10 +18,23 @@ void clear(int q) {
 		Q_cmp = cnone;
 		Q_bool = bnone;
 	}
+	if (Spil) {
+	//	cgpop2();
+	//	cgswap();
+		Spil--;
+	}
+
 }
 
 void load(void) {
 	Acc = 1;
+	if (Spil) {
+		Spil--;
+	}
+}
+
+void genswap(int dir) {
+	cgswap3(dir);
 }
 
 int label(void) {
@@ -33,6 +47,7 @@ void spill(void) {
 	if (Acc) {
 		gentext();
 		cgpush();
+		Spil++;
 	}
 }
 
@@ -366,6 +381,8 @@ void genmodu(int swapped) {
 static void binopchk(int op, int p1, int p2) {
 	p1 = realtype(p1);
 	p2 = realtype(p2);
+	if (p1 == PANY) p1 = PINT;
+	if (p2 == PANY) p2 = PINT;
 	if (ASPLUS == op)
 		op = PLUS;
 	else if (ASMINUS == op)
@@ -597,6 +614,7 @@ void gencalr(void) {
 }
 
 void genentry(char *name) {
+	Spil = 0;
 	gentext();
 	cgentry(gsym(name));
 }

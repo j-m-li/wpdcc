@@ -162,6 +162,9 @@ int typematch(int p1, int p2) {
 	int pp1, pp2;
 	p1 = realtype(p1);
 	p2 = realtype(p2);
+	if ((p1 & ~PRIMASK) == PANY || (p2 & ~PRIMASK) == PANY) {
+		return 1;
+	}
 	if (p1 == p2) return 1;
 	if (inttype(p1) && inttype(p2)) return 1;
 	if (!inttype(p1) && VOIDPTR == p2) return 1;
@@ -227,7 +230,7 @@ static node *funorarr(int size)
 			Token = scant();
 			n = mkleaf(OP_ARRAY, 0);
                 } else {
-                	size = constexpr();
+                	size = constexpr0();
                         if (size < 1) {
                        		error("invalid array size %s", Text);
                                 size = 0;
@@ -515,6 +518,7 @@ static node *brackexpr(node *n, int *lv) {
 	q = deref(p);
 	if (    PINT == p ||
 		PUNSIG == p ||
+		PANY == p ||
 		PFLOAT == p || 
 		(p & PPTR) ||
 		VOIDPTR == p ||
@@ -576,7 +580,7 @@ static node *postfix(int *lv) {
 
 				n = mkbinop(OP_GLUE, n, fn);
 				n = mkunop2(OP_CALR, lv[LVSYM], na, n);
-				lv[LVPRIM] = PINT;
+				lv[LVPRIM] = PANY;
 			}
 			lv[LVADDR] = 0;
 			break;
@@ -845,7 +849,7 @@ static node *cast(int *lv) {
 			if (RBRACK == Token) {
 				t = findarray(t, 0);
 			} else {
-				t = findarray(t, constexpr());
+				t = findarray(t, constexpr0());
 			}
 			rbrack();
 		}	
@@ -1106,7 +1110,7 @@ int arithop(int tok) {
 static node *asgmnt(int *lv) {
 	node	*n, *n2, *src;
 	int	lv2[LV], lvs[LV], op;
-
+	int 	lp;
 	n = cond3(lv);
 	if (ASSIGN == Token || ASDIV == Token || ASMUL == Token ||
 		ASMOD == Token || ASPLUS == Token || ASMINUS == Token ||
@@ -1193,7 +1197,7 @@ void rexpr(void) {
 	expr(lv, 1);
 }
 
-int constexpr(void) {
+int constexpr0(void) {
 	node	*n;
 	int	lv[LV];
 

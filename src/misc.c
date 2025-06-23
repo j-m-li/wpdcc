@@ -42,6 +42,7 @@ void init(void) {
 	addglob("void", 0, 0, 0, 0, 0, NULL, 0);
 	addglob("void*", 0, 0, 0, 0, 4, NULL, 0);
 	addglob("()", 0, 0, 0, 0, 4, NULL, 0);
+	addglob("(any)", 0, 0, 0, 0, 4, NULL, 0);
 	addglob("(*)", 0, 0, 0, 0, 4, NULL, 0);
 	if (Globs != FUNPTR + 1) {
 		fprintf(stderr, "Panic!");
@@ -144,7 +145,7 @@ int realtype(int p) {
 
 int inttype(int p) {
 	p = realtype(p);
-	return PINT == p || PCHAR == p || PUNSIG == p || PSCHAR == p;
+	return PANY == p || PINT == p || PCHAR == p || PUNSIG == p || PSCHAR == p;
 }
 
 int comptype(int p) {

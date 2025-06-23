@@ -131,6 +131,7 @@ void cgstorsb(int n);
 void cgstorsw(int n);
 void cgsub(void);
 void cgswap(void);
+void cgswap3(int dir);
 void cgand(void);
 void cgxor(void);
 void cgtext(void);

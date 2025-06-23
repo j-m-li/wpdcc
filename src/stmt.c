@@ -365,7 +365,7 @@ static void switch_block(void) {
 		}
 		if (CASE == Token) {
 			Token = scant();
-			cval[nc] = constexpr();
+			cval[nc] = constexpr0();
 			genlab(clab[nc++] = label());
 			colon();
 		}
@@ -439,7 +439,7 @@ static void wrong_ctx(int t) {
 	else {
 		error("'case' not in 'switch' context", NULL);
 		Token = scant();
-		constexpr();
+		constexpr0();
 		colon();
 	}
 }

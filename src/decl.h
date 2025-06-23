@@ -18,7 +18,7 @@ void	commit_bool(void);
 void	commit_cmp(void);
 void	compound(int lbr);
 int	comptype(int p);
-int	constexpr(void);
+int	constexpr0(void);
 int	constexpr2(char *name, int utype, int prim, int type, 
 		int scls, int *psize, int *pval, int *pinit, int *paddr);
 int	constexpr3(char *name, int prim,  int scls, 
@@ -107,6 +107,7 @@ void	genstack(int n);
 void	genstacksize(char *name, int n);
 void	genstore(int *lv);
 int	gensub(int p1, int p2, int swap);
+void	genswap(int dir);
 void	genswitch(int *vals, int *labs, int nc, int dflt);
 void	gentext(void);
 void	gentmp(int n);

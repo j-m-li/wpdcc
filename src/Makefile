@@ -1,6 +1,6 @@
-PREFIX=	/usr/local
+PREFIX=	$(HOME)/.local
 EXESFX=	
-SCCDIR=	$(PREFIX)/scc
+SCCDIR=	$(PREFIX)/wpdcc
 BINDIR=	$(PREFIX)/bin
 SC86DIR=$(PREFIX)/scc86
 
@@ -153,8 +153,9 @@ dirs86:
 
 install:	all
 	./scc0 -o scc -D 'SCCDIR="$(SCCDIR)"' $(SRC)
-	cp scc $(BINDIR)/scc$(EXESFX)
-	strip $(BINDIR)/scc$(EXESFX)
+	mkdir -p $(BINDIR)/
+	cp scc $(BINDIR)/wpdcc$(EXESFX)
+	strip $(BINDIR)/wpdcc$(EXESFX)
 	mkdir -p $(SCCDIR)/include
 	cp -r include/* $(SCCDIR)/include
 	mkdir -p $(SCCDIR)/lib

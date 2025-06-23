@@ -71,6 +71,7 @@ enum {
 	PVOID,
 	VOIDPTR,
 	PFUN,
+	PANY,
 	FUNPTR, /* must be the last */
 	P__FREE = 0x200000,
 	PSTRUCT = 0x400000,

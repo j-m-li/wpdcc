@@ -41,7 +41,7 @@ static void enumdecl(int clss) {
 		ident();
 		if (ASSIGN == Token) {
 			Token = scant();
-			v = constexpr();
+			v = constexpr0();
 		}
 		if (CAUTO != clss)
 			addglob(name, PINT, TCONSTANT, 0, 0, v++, NULL, 0);
@@ -352,7 +352,7 @@ static void arraydecl(int *pprim, int *psize)
 	int dummy;
 
 	prim = *pprim;
-	size = constexpr();
+	size = constexpr0();
 	if (size < 1) {
 		error("invalid array size %s", Text);
 		size = 0;
@@ -380,7 +380,7 @@ static node *arrdcl(int *pprim)
 	if (RBRACK == Token) {
 		Token = scant();
 	} else {
-		size = constexpr();
+		size = constexpr0();
 		if (size < 1) {
 			error("invalid array size %s", Text);
 		}
@@ -627,7 +627,7 @@ static int declarator(int pmtr, int scls, char *name, int utype, int *pprim, int
 	if (CMEMBER == scls && COLON == Token) {
 		/* bit field */
 		Token = scant();
-		constexpr();
+		constexpr0();
 	}
 	
 
@@ -906,8 +906,8 @@ void decl(int clss, int prim, int utype) {
 				genaligntext();
 				genentry(name);
 				Retlab = label();
-				Thislsize = 0; /* is negative */
-				Thismsize = 0;
+				Thislsize = -(BPW*2); /* is negative */
+				Thismsize = -(BPW*2);
 				compound(0);
 				genlab(Retlab);
 				genstacksize(name, Thismsize);

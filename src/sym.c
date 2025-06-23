@@ -224,8 +224,9 @@ static void defglob(char *name, int prim, int type, int size, int val,
 int redeclare(char *name, int oldcls, int newcls) {
 	switch (oldcls) {
 	case CEXTERN:
-		if (newcls != CPUBLIC && newcls != CEXTERN)
+		if (newcls != CPUBLIC && newcls != CEXTERN) {
 			error("extern symbol redeclared static: %s", name);
+		}
 		return newcls;
 	case CPUBLIC:
 		if (CEXTERN == newcls)
@@ -265,7 +266,7 @@ int addglob(char *name, int prim, int type, int scls, int size, int val,
 
 	if (0 == *name)
 		y = 0;
-	else if (TSTRUCT != type && TUNION != type && 
+	else if (scls != CMEMBER && TSTRUCT != type && TUNION != type && 
 			(y = findglob(name)) != 0) 
 	{
 		if (type != TMACRO && Types[y] != TMACRO) {
@@ -463,6 +464,7 @@ static char *typename(int p) {
 		PFLOAT   == p? "FLOAT":
 		(PPTR & p) ? "*":
 		FUNPTR  == p? "FUN*":
+		PANY  == p? "ANY":
 		PVOID   == p? "VOID": "n/a";
 }
 

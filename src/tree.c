@@ -201,15 +201,26 @@ void emitcond(node *a, int ex) {
 	emittree1(a->right);
 }
 
+
 void emitargs(node *a) {
 	if (NULL == a) return;
 	emittree1(a->right);
 	emitargs(a->left);
 }
 
+
+void emitargs1(node *a, int depth, int maxi) {
+	if (NULL == a) return;
+	if (depth > 0 && depth <= maxi) {
+		emittree1(a->right);
+	}
+	emitargs1(a->left, depth + 1, maxi);
+}
+
 static void emittree1(node *a) {
 	int	lv[LV];
 	int	ptr = 0;
+	node    *b;
 
 	if (NULL == a) return;
 	switch (a->op) {
@@ -345,16 +356,26 @@ static void emittree1(node *a) {
 			gencall(a->args[0]);
 			genstack((a->args[1]) * BPW);
 			break;
-	case OP_CALR:	emitargs(a->left);
-			commit(); /* FIXME struct function ptr !!*/
-			spill();
-			clear(0);
-			lv[LVPRIM] = FUNPTR;
-			lv[LVSYM] = a->args[0];
-			genrval(lv);
-			gencalr();
-			genstack((a->args[1]) * BPW);
-			break;
+	case OP_CALR:
+			if (a->args[0]) {
+				emitargs(a->left);
+                        	commit();
+				spill();
+				clear(0);
+			} else {
+				emitargs1(a->left, 0, a->args[1]);
+                        	commit(); 
+				spill();
+				clear(0);
+				emitargs1(a->left, 1, 1);
+				clear(0);
+			}
+                        lv[LVPRIM] = FUNPTR;
+                        lv[LVSYM] = a->args[0];
+                        genrval(lv);
+                        gencalr();
+                        genstack((a->args[1]) * BPW);
+                        break;
 	case OP_ASSIGN: if (OP_IDENT == a->left->op) {
 				emittree1(a->right);
 				commit();
