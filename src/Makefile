@@ -31,7 +31,8 @@ LIBOBJS=lib/init.o lib/abort.o lib/abs.o lib/access.o lib/atexit.o lib/atoi.o \
 	lib/strpbrk.o lib/strrchr.o lib/strspn.o lib/strstr.o lib/strtok.o \
 	lib/strtol.o lib/system.o lib/time.o lib/tmpfile.o \
 	lib/tmpnam.o lib/truncate.o lib/ungetc.o lib/varargs.o lib/vformat.o \
-	lib/vfprintf.o lib/vprintf.o lib/vscan.o lib/vsprintf.o
+	lib/vfprintf.o lib/vprintf.o lib/vscan.o lib/vsprintf.o 
+
 
 OS := $(shell uname -s)
 ifeq ($(OS),Darwin)

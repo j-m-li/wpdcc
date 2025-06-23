@@ -4,6 +4,8 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
+
 
 int getchar(void) {
 	return fgetc(stdin);
