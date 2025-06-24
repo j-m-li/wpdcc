@@ -1,7 +1,10 @@
 
 #include <stdio.h>
 #include <dirent.h>
+#include <sys/stat.h>
 #include <errno.h>
+
+#define IMPORT(f) __attribute__((import_module("env"), import_name(f))) 
 
 int     errno = EOK;
 
@@ -17,46 +20,92 @@ struct jmp_buf_ {
 	int eax;
 };
 #define jmp_buf struct jmp_buf_
-struct linux_dirent {
-	char *name;
-};
 
-struct kstat {
-	int s;
-};
+void _event(int *ev) {
+	printf("event typ:%d, data_Len:%d dataptr:%x\n", ev[3], ev[4], ev[5]);
+	_write(0, ev[5], ev[4]);
+}
+
+
+void *_init(void) {
+	static int _ev[6 + 256 / 4];
+        int     i;
+        for (i=0; i<FOPEN_MAX; i++)
+                _files[i] = NULL;
+        for (i=0; i<OPENDIR_MAX; i++)
+                _dirs[i] = NULL;
+        stdin = fdopen(0, "r");
+        stdout = fdopen(1, "w");
+        stderr = fdopen(2, "w");
+        stdin->mode = _IOLBF;
+        stdout->mode = _IOLBF;
+        stderr->mode = _IOLBF;
+
+	return _ev;
+}
+
+IMPORT("_system") int _system(char *cmd);
+IMPORT("_exit") void _exit(int rc);
+IMPORT("_write") int _write(int fd, void *buf, int len);
+IMPORT("_read") int _read(int fd, void *buf, int len);
+IMPORT("_lseek") int _lseek(int fd, int pos, int how);
+IMPORT("_creat") int _creat(char *path, int mode);
+IMPORT("_open") int _open(char *path, int flags);
+IMPORT("_close") int _close(int fd);
+IMPORT("_truncate") int _truncate(char *path, int size);
+IMPORT("_getdents") int _getdents(int fd, struct dirent *dirent, int count);
+IMPORT("_access") int _access(char *path, int mode);
+IMPORT("_stat") int _stat(char *path, struct stat *buf);
+IMPORT("_mkdir") int _mkdir(char *path, int mode);
+IMPORT("_rmdir") int _rmdir(char *path);
+IMPORT("_unlink") int _unlink(char *path);
+IMPORT("_rename") int _rename(char *old, char *new);
+IMPORT("_time") int _time(void);
 
 int main(int,char*[]);
-
 void _start()
 {
-	main(0,0);
+
 }
 
-int setjmp(jmp_buf env){}
-void longjmp(jmp_buf env, int v){}
-void _exit(int rc){}
-int _sbrk(int size){}
-int _write(int fd, void *buf, int len){}
-int _read(int fd, void *buf, int len){}
-int _lseek(int fd, int pos, int how){}
-int _creat(char *path, int mode){}
-int _open(char *path, int flags){}
-int _close(int fd){}
-int _truncate(char *path, int size){}
-int _getdents(int fd, struct linux_dirent *dirent, int count){}
+
+int _sbrk(int size) {
+	int old = __builtin_wasm_memory_size(0) * 0x10000;
+	size += 0xFFFF + old;
+	size &= ~0xFFFF;
+	if (size > 0) {
+		__builtin_wasm_memory_grow(0, size >> 16);
+	}
+	return old;
+}
+
+
 int _strlen(char *buf)
 {
+	int i = 0;
+	while (buf[i]) i++;
+	return i;
 }
-int _stat(char *path, struct kstat *buf){}
-int _access(char *path, int mode){}
-int _mkdir(char *path, int mode){}
-int _rmdir(char *path){}
-int _unlink(char *path){}
-int _rename(char *old, char *new){}
-int _fork(void){}
-int _wait(int *rc){}
-int _execve(char *path, char *argv[], char *envp[]){}
-int _time(void){}
-int raise(int sig){}
-int signal(int sig, int (*fn)()){}
+
+int setjmp(jmp_buf env) {
+	printf("unsupported");
+}
+void longjmp(jmp_buf env, int v) {
+	printf("unsupported");
+}
+int _fork(void) {
+	printf("unsupported");
+}
+int _wait(int *rc) {
+	printf("unsupported");
+}
+int _execve(char *path, char *argv[], char *envp[]) {
+	printf("unsupported");
+}
+int raise(int sig) {
+	printf("unsupported");
+}
+int signal(int sig, int (*fn)()) {
+	printf("unsupported");
+}
 
