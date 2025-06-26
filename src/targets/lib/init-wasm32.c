@@ -81,13 +81,14 @@ void _start()
 
 int _sbrk(int size) {
 	static int old = 0;
+	int r = old;
 	size += 0xFFFF + old;
 	size &= ~0xFFFF;
 	if (size > 0) {
 		__builtin_wasm_memory_grow(0, size >> 16);
 	}
 	old = __builtin_wasm_memory_size(0) * 0x10000;
-	return old;
+	return r;
 }
 
 

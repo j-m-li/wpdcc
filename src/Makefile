@@ -3,6 +3,7 @@ EXESFX=
 SCCDIR=	$(PREFIX)/wpdcc
 BINDIR=	$(PREFIX)/bin
 SC86DIR=$(PREFIX)/scc86
+SCC=clang --target=wasm32 -ansi -I. -Iinclude -nostdlib -fno-builtin 
 
 LINT=	gcc -O3 -c -o /dev/null -ansi -pedantic -Wall
 
@@ -48,6 +49,14 @@ RANLIB=	ranlib -D
 
 all:	scc0 crt0 ncrt0 lib 
 
+web:
+	web=1 make web1
+
+web1:	setcc install-web webtest
+
+setcc:
+	rm -f lib/*.o
+
 ini:
 	cp /u/scc/lib/* lib/
 	touch lib/*.a lib/*.o
@@ -87,8 +96,19 @@ lib/libscc.a:	$(LIBOBJS)
 $(SRC):		$(HDRS)
 libscc.a:	$(OBJS)
 
+
+lib/libwasm.a:	$(LIBOBJS)
+	mv *.o lib/
+	$(AR) lib/libwasm.a $(LIBOBJS)
+	$(RANLIB) lib/libwasm.a
+
+
 .c.o:
-	./scc0 -c $<
+ifdef web 
+		$(SCC) -c $<
+else
+		./scc0 -c $<
+endif
 
 scc.exe:	main.c
 	./scc0 -o scc.exe main.c
@@ -137,6 +157,8 @@ inittest:	scc0 lib/crt0.o lib/libscc.a ../tests/inittest.c
 	(cd ../tests && ./inittest)
 	rm ../tests/inittest
 
+webtest:
+	(cd ../tests && sh ./webtest.sh)
 
 dirs:
 	-mkdir $(PREFIX)
@@ -161,6 +183,15 @@ install:	all
 	cp -r include/* $(SCCDIR)/include
 	mkdir -p $(SCCDIR)/lib
 	cp lib/libscc.a lib/crt0.o lib/ncrt0.o $(SCCDIR)/lib
+
+
+install-web: lib/libwasm.a	
+	mkdir -p $(SCCDIR)/lib
+	mkdir -p $(SCCDIR)/www
+	cp lib/libwasm.a $(SCCDIR)/lib
+	cp targets/web-wasm32/* $(SCCDIR)/www
+
+
 
 install-scc86:	all
 	scc -o scc86 -D 'SCCDIR="$(SC86DIR)"' $(SRC)
