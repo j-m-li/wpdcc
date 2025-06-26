@@ -52,10 +52,12 @@ all:	scc0 crt0 ncrt0 lib
 web:
 	web=1 make web1
 
-web1:	setcc install-web webtest
+web1:	setwebsrc install-web webtest
 
-setcc:
+setwebsrc:
 	rm -f lib/*.o
+	ln -fs ../targets/lib/init-wasm32.c lib/init.c
+	ln -fs targets/cg/cgwasm32.h cg.h
 
 ini:
 	cp /u/scc/lib/* lib/

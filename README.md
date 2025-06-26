@@ -49,9 +49,11 @@ To get the original SubC version go to : https://t3x.org/subc/
 Includes these modifications : https://github.com/googlielmo/subc
 
 
-
+## Build
 ```
 ./configure -m i386 -s Linux
 cd src
-make
+make install
+make web
+
 ```
