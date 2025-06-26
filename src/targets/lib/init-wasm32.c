@@ -6,6 +6,10 @@
 
 #define IMPORT(f) __attribute__((import_module("env"), import_name(f))) 
 
+int main(int,char*[]);
+void setup(void);
+void loop(void);
+
 int     errno = EOK;
 
 FILE    *_files[FOPEN_MAX];
@@ -16,14 +20,21 @@ FILE *stdin = 0;
 FILE *stdout = 0;
 FILE *stderr = 0;
 char **environ = 0;
+
 struct jmp_buf_ {
 	int eax;
 };
 #define jmp_buf struct jmp_buf_
 
 void _event(int *ev) {
+	static int state = 0;
+	if (state == 0) {
+		state = 1;
+		setup();
+	}
 	printf("event typ:%d, data_Len:%d dataptr:%x\n", ev[3], ev[4], ev[5]);
 	_write(0, ev[5], ev[4]);
+	loop();
 }
 
 
@@ -62,7 +73,6 @@ IMPORT("_unlink") int _unlink(char *path);
 IMPORT("_rename") int _rename(char *old, char *new);
 IMPORT("_time") int _time(void);
 
-int main(int,char*[]);
 void _start()
 {
 
@@ -70,12 +80,13 @@ void _start()
 
 
 int _sbrk(int size) {
-	int old = __builtin_wasm_memory_size(0) * 0x10000;
+	static int old = 0;
 	size += 0xFFFF + old;
 	size &= ~0xFFFF;
 	if (size > 0) {
 		__builtin_wasm_memory_grow(0, size >> 16);
 	}
+	old = __builtin_wasm_memory_size(0) * 0x10000;
 	return old;
 }
 

@@ -103,11 +103,11 @@ sccmain.exe:	$(SRC) targets/lib/ulibc.c targets/dos-8086/dosmain.c
 	./scc0 -o dosmain.o -c targets/dos-8086/dosmain.c
 	sld -o sccmain.exe lib/crt0.o *.o lib/libscc.a
 
-tests:	test inittest ptest systest libtest sigtest 
+tests:	test  
 	@echo "Looks good!"
 
-test:	scc $(SRC)
-	sh ../tests/triple-test.sh
+test:	install
+	(cd ../tests && sh ./webtest.sh)
 
 ptest:	scc0 lib/crt0.o lib/libscc.a ../tests/ptest.src ../tests/ptest.awk
 	awk -f ../tests/ptest.awk <../tests/ptest.src >../tests/ptest.c
@@ -158,7 +158,9 @@ dirs86:
 
 install:	all
 	mkdir -p $(SCCDIR)/lib
+	mkdir -p $(SCCDIR)/www
 	cp lib/libwasm.a $(SCCDIR)/lib
+	cp targets/web-wasm32/* $(SCCDIR)/www
 
 install-scc86:	all
 	scc -o scc86 -D 'SCCDIR="$(SC86DIR)"' $(SRC)

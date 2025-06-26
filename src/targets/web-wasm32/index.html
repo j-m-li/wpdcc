@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="generator" content="HTML Tidy for HTML5 for Linux version 5.6.0">
+  <title></title>
+  <link crossorigin="anonymous" media="all" rel="stylesheet" href="style.css">
+</head>
+<body>
+  <button onclick="theApp.term.addtxt('hello world')">hello</button> <button onclick="theApp.dj.test()">test</button> <button onclick="theApp.dj.login()">login</button>
+  <div class="full" id="full_div">
+    <textarea id="kbd_input" autofocus="true" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off">_</textarea>
+    <div id="mouse_input" title="" href="c:">
+      <!--<canvas id="screen" 
+                width="640" 
+                height="480">
+        Unsupported web browser...
+</canvas>
+-->
+      <div id="screen"></div>
+    </div>
+  </div>
+  <script id="scripts" src="webterm.js"></script> 
+  <script>
+
+
+  var theApp = document.theApp;
+  function kbd_keydown(ev)
+  {
+        if (ev.isComposing || ev.keyCode === 229) {
+                return false;
+        }
+        var r = theApp.term.keydown(ev.code, 
+                ev.shiftKey,
+                ev.ctrlKey,
+                ev.altKey, 
+                ev.metaKey);
+        if (r.length > 0) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                theApp.out.send(r);
+                return true
+        }
+        return false;
+  }
+
+  var kbd_index = 1;
+  function kbd_init()
+  {
+        var k = document.getElementById('kbd_input');
+        k.value = "_";
+        kbd_index = 1;
+        k.setSelectionRange(1,1);
+        k.focus();
+  }
+  function kbd_change(ev)
+  {
+        var k = document.getElementById('kbd_input');
+        if (k.selectionStart < 1) {
+                k.setSelectionRange(1,1);
+                k.value = "_";
+                kbd_index = 1;
+                k.focus();
+        }
+  }
+
+
+  function kbd_start(ev)
+  {
+  }
+
+  function kbd_input(ev)
+  {
+        var k = ev.target;
+        var v = k.value;
+        var o = v;
+        if (v.length < kbd_index || v.length == 0) {
+                var i = kbd_index - v.length -1;
+                o = "\b";
+                while (i > 0) {
+                        o = o + "\b";
+                        i--;
+                }
+                kbd_init();
+        } else if (v.length == kbd_index && kbd_index > 1) {
+                o = "\b"  + v.substr(kbd_index - 1);
+                kbd_init();
+        } else {
+                o = v.substr(kbd_index);
+                kbd_index = v.length;
+        }
+        theApp.out.send(o);
+        if (o.trim() === '') {
+                kbd_init();
+        }
+        return true;
+  }       
+
+  function full_focus(ev)
+  {
+        kbd_init();
+        ev.preventDefault();
+        ev.stopPropagation();
+        return true;
+  }
+
+  function mouse_click(ev)
+  {
+        var s = window.getSelection();
+        return full_focus(ev); 
+  }
+
+
+  function mouse_move(ev)
+  {
+        ev.preventDefault();
+        ev.stopPropagation();
+        return false;
+  }
+
+  function resize()
+  {
+        theApp.term.resize(window.innerWidth, window.innerHeight);;
+  }
+
+  kbd_init();
+
+  document.getElementById('full_div').addEventListener(
+        'click', full_focus, false);
+  document.getElementById('mouse_input').addEventListener(
+        'mouseup', mouse_click, false);
+  document.getElementById('mouse_input').addEventListener(
+        'mouseenter', mouse_move, false);
+  document.getElementById('mouse_input').addEventListener(
+        'mousemove', mouse_move, false);
+
+  document.getElementById('kbd_input').addEventListener(
+        'input', kbd_input, false);
+  document.getElementById('kbd_input').addEventListener(
+        'keydown', kbd_keydown, false);
+  document.getElementById('kbd_input').addEventListener(
+        'compositionstart', kbd_start, false);
+  document.addEventListener(
+        'selectionchange', kbd_change, false);
+  window.addEventListener('resize', resize);
+  </script>
+</body>
+</html>
