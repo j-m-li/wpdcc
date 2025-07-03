@@ -4,6 +4,9 @@
 #include <sys/stat.h>
 #include <errno.h>
 
+int _get_arg(int index, void *buf, int len);
+void _exit(int rc);
+
 #define IMPORT(f) __attribute__((import_module("env"), import_name(f))) 
 
 int main(int,char*[]);
@@ -28,12 +31,22 @@ struct jmp_buf_ {
 
 void _event(int *ev) {
 	static int state = 0;
+	char buf[80];
+	int l;
 	if (state == 0) {
 		state = 1;
 		setup();
 	}
-	printf("event typ:%d, data_Len:%d dataptr:%x\n", ev[3], ev[4], ev[5]);
-	_write(0, ev[5], ev[4]);
+	fprintf(stderr, "event typ:%d, data_Len:%d dataptr:%x\n", ev[3], ev[4], ev[5]);
+	_write(1, ev[5], ev[4]);
+	l = _get_arg(1, buf, sizeof(buf));
+	if (l > 0) {
+		_write(1, buf, l);
+		_write(1, "\n", 1);
+		loop();
+		_exit(1);
+		return;
+	}
 	loop();
 }
 
@@ -55,6 +68,7 @@ void *_init(void) {
 	return _ev;
 }
 
+IMPORT("_get_arg") int _get_arg(int index, void *buf, int len);
 IMPORT("_system") int _system(char *cmd);
 IMPORT("_exit") void _exit(int rc);
 IMPORT("_write") int _write(int fd, void *buf, int len);
@@ -100,24 +114,24 @@ int _strlen(char *buf)
 }
 
 int setjmp(jmp_buf env) {
-	printf("unsupported");
+	fprintf(stderr, "unsupported setjmp function");
 }
 void longjmp(jmp_buf env, int v) {
-	printf("unsupported");
+	fprintf(stderr, "unsupported longjmp function");
 }
 int _fork(void) {
-	printf("unsupported");
+	fprintf(stderr, "unsupported fork function");
 }
 int _wait(int *rc) {
-	printf("unsupported");
+	fprintf(stderr, "unsupported wait function");
 }
 int _execve(char *path, char *argv[], char *envp[]) {
-	printf("unsupported");
+	fprintf(stderr, "unsupported execve function");
 }
 int raise(int sig) {
-	printf("unsupported");
+	fprintf(stderr, "unsupported raise function");
 }
 int signal(int sig, int (*fn)()) {
-	printf("unsupported");
+	fprintf(stderr, "unsupported signal function");
 }
 

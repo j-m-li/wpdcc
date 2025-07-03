@@ -1,10 +1,6 @@
-/*
- */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-
+int _system(char *cmd);
 
 int system(char *cmd) {
+	return _system(cmd);
 }

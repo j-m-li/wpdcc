@@ -12,6 +12,9 @@
 	zcat ~/.local/wpdcc/www/3o3_exe.cmd.gz > \
 			~/.local/wpdcc/www/test.cmd
 	cat test.wasm >> ~/.local/wpdcc/www/test.cmd
+	zcat ~/.local/wpdcc/www/3o3_exe.cmd.gz > \
+			~/.local/wpdcc/www/test1.cmd
+	cat test.wasm >> ~/.local/wpdcc/www/test1.cmd
 	(cd ~/.local/wpdcc/www/; http-server)
 	rm -f test.wasm
 #	llvm-objdump  --full-contents  -d tk.wasm

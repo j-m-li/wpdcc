@@ -1078,6 +1078,12 @@ std.sha256 = function(utf16) {
 var theApp = [];
 theApp.out = new Out();
 theApp.std = std;
+theApp.process = [];
+theApp.wasm = 0;
+theApp.args = 0;
+theApp.aterm = 0;
+theApp._start = 0;
+theApp.descriptors = [{p:0,n:"stdin"},{p:1,n:"stdout"},{p:2,n:"stderr"}];
 theApp.term = new WebTerm(document.getElementById('screen'), window.innerWidth,
   window.innerHeight, theApp.out);
 document.theApp = theApp;
@@ -1087,6 +1093,53 @@ theApp.out.term = theApp.term;
 function mem2string(ptr, len) {
   const bytes = new Uint8Array(theApp.wasm.exports.memory.buffer, ptr, len);
   return new TextDecoder('utf-8').decode(bytes);
+}
+
+function string2mem(txt, ptr, len) {
+  const b = new Uint8Array(theApp.wasm.exports.memory.buffer, ptr, len);
+  let r = -1;
+  let i;
+  let j;
+  len -= 4;
+  for (i = 0; i < txt.length && r < len; i++) {
+    j = txt.codePointAt(i);
+    if (j < 0x80) {
+      b[r += 1] = j;
+    } else if (j >= 0xDC00 && j <= 0xDFFF) {
+      // ignore trailing surrogate
+    } else if (j <= 0x07FF) {
+      b[r += 1] = (0xC0 | ((j >> 6) & 0x1F));
+      b[r += 1] = (0x80 | (j & 0x3F));
+    } else if (j <= 0xFFFF) {
+      b[r += 1] = (0xE0 | ((j >> 12) & 0x0F));
+      b[r += 1] = (0x80 | ((j >> 6) & 0x3F));
+      b[r += 1] = (0x80 | (j & 0x3F));
+    } else if (j <= 0x10FFFF) {
+      b[r += 1] = (0xF0 | ((j >> 18) & 0x07));
+      b[r += 1] = (0x80 | ((j >> 12) & 0x3F));
+      b[r += 1] = (0x80 | ((j >> 6) & 0x3F));
+      b[r += 1] = (0x80 | (j & 0x3F));
+    } else {
+      console.log("error in string to utf8");
+    }
+  }
+  b[r += 1] = 0;
+  return r;
+
+}
+
+
+function strlen(ptr) {
+  const len = theApp.wasm.exports.memory.buffer.byteLength - ptr;
+  const bytes = new Uint8Array(theApp.wasm.exports.memory.buffer, ptr, len);
+  let i = 0;
+  while (i < len) {
+	if (bytes[i] == 0) {
+		return i;
+	}
+	i++;
+  }
+  return 0;
 }
 
 function keyboard(e) {
@@ -1117,6 +1170,8 @@ function keyboard(e) {
   a[4] = s; /* event data length */
   a[5] = theApp.aterm + 4 * 6; /* event data pointer */
   theApp.wasm.exports._event(theApp.aterm);
+
+ system("test1 echo hello");
 }
 
 function print(ptr) {
@@ -1124,11 +1179,13 @@ function print(ptr) {
 }
 
 function timeout() {
-  let d = new Int32Array(theApp.wasm.exports.memory.buffer, theApp.aterm, 6);
-  d[3] = 0;
-  d[4] = 0;
-  d[5] = 0;
-  theApp.wasm.exports._event(theApp.aterm);
+  if (theApp.wasm) {
+    let d = new Int32Array(theApp.wasm.exports.memory.buffer, theApp.aterm, 6);
+    d[3] = 0;
+    d[4] = 0;
+    d[5] = 0;
+    theApp.wasm.exports._event(theApp.aterm);
+  }
   setTimeout(timeout, 100);
 }
 
@@ -1141,12 +1198,34 @@ let stdoutBuffer = "";
 const imp = {
   env: {
         _exit: function(rc) {
+		theApp.rc = rc;
+		if (theApp.process.length > 0) {
+			const p = theApp.process.pop();
+			theApp.args = p.args;
+			theApp.aterm = p.aterm;
+			theApp.wasm = p.wasm;
+		}
+		return rc;
 	},
         _system: function(cmd) {
+		return system(mem2string(cmd, strlen(cmd)));
 	},
         _lseek: function(fd, pos, how) {
+		if (how == 0) { /* set */
+		} else if (how == 1) { /* current */
+		} else if (how == 2) { /* end */
+		}
 	},
         _creat: function(path, mode) {
+	},
+        _open: function(path, flags) {
+		//theApp.descriptors;
+		
+		if (flags == 0) { /* read only */
+		} else if (flags == 1) { /* write only */
+		} else if (flags == 2) { /* read write */
+
+		}
 	},
         _truncate: function(path, size) {
 	},
@@ -1165,25 +1244,58 @@ const imp = {
         _rename: function(old, new_) {
 	},
         _time: function() {
+		return Math.floor(Date.now() / 1000);
 	},
         _write: function(fd,buf,len) {
-		theApp.term.add_txt(mem2string(buf, len));
+		if (fd == 1) {
+			theApp.term.add_txt(mem2string(buf, len));
+		} else if (fd == 2) {
+			console.log(mem2string(buf, len));
+		} else {
+			len = 0;
+		}
 		return len;
 	},
         _read: function(fd,buf,len) {
+	},
+        _get_arg: function(index,buf,len) {
+		if (index >= theApp.args.length) {
+			return 0;
+		}
+		return string2mem(theApp.args[index], buf, len);
 	},
         _close: function(fd) {
 	}
 
   }
 };
-fetch("test.cmd").then(bytes => bytes.arrayBuffer()).then(mod => WebAssembly
-  .compile(mod.slice(128))).then(module => {
-  return new WebAssembly.Instance(module, imp);
-}).then(instance => {
-  theApp.wasm = instance;
-  theApp.aterm = instance.exports._init();
-  //document.body.addEventListener("input", keyboard);
-  setTimeout(timeout, 100);
-  theApp._start = instance.exports._start;
-});
+
+
+function system(cmd)
+{
+	let args = cmd.split(" ");
+
+	fetch(args[0] + ".cmd").then(bytes => 
+		bytes.arrayBuffer()).then(mod => WebAssembly
+  			.compile(mod.slice(128))).then(module => {
+  			return new WebAssembly.Instance(module, imp);
+	}).then(instance => {
+	theApp.process.push({args: theApp.args, wasm: theApp.wasm, aterm: theApp.aterm});
+	theApp.args = args;
+  	theApp.wasm = instance;
+	theApp.rc = 0;
+  	theApp.aterm = instance.exports._init();
+	if (!theApp._start) {
+  	  //document.body.addEventListener("input", keyboard);
+  	  theApp._start = instance.exports._start;
+	}
+	}).catch((error) => {
+		console.log(error);
+		theApp.rc = -1;
+	});
+}
+
+setTimeout(timeout, 100);
+
+system("test");
+
