@@ -1,0 +1,9 @@
+[submodule "slink"]
+	path = slink
+	url = https://git.candlhat.org/slink.git
+[submodule "sasm"]
+	path = sasm
+	url = https://git.candlhat.org/sasm.git
+[submodule "sar"]
+	path = sar
+	url = https://git.candlhat.org/sar.git

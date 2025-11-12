@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <unistd.h>
 
 int _get_arg(int index, void *buf, int len);
 void _exit(int rc);
@@ -38,7 +39,7 @@ void _event(int *ev) {
 		setup();
 	}
 	fprintf(stderr, "event typ:%d, data_Len:%d dataptr:%x\n", ev[3], ev[4], ev[5]);
-	_write(1, ev[5], ev[4]);
+	_write(1, (void*)ev[5], ev[4]);
 	l = _get_arg(1, buf, sizeof(buf));
 	if (l > 0) {
 		_write(1, buf, l);

@@ -14,7 +14,7 @@ default:
 	@echo "Use 'make configure' followed by 'make install' to build and install scc."
 
 configure: clean
-	./configure -m i386 -s Linux
+	./configure -m x86_64 -s UEFI 
 
 all:
 	cd src && make all

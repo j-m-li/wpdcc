@@ -34,6 +34,7 @@ x:	call	Cexit		#EXIT
 	divl	%ebx
 	jmp	x
 
+
 # internal switch(expr) routine
 # %esi = switch table, %eax = expr
 
@@ -55,6 +56,11 @@ no:	loop	next
 	lodsl
 	popl	%esi
 	jmp	*%eax
+
+	.globl C__builtin_trap
+C__builtin_trap:
+	ud2
+	ret
 
 # int setjmp(jmp_buf env);
 
