@@ -1,0 +1,27 @@
+#******************************************************************************
+# @file             Makefile.unix
+#******************************************************************************
+SRCDIR              ?=  $(CURDIR)
+VPATH               :=  $(SRCDIR)
+
+CC                  := 	wpdcc 
+CFLAGS              := -DNO_LONG_LONG=1 
+
+CSRC                :=  as.c coff.c cstr.c elks.c expr.c fixup.c frag.c hashtab.c intel.c kwd.c lex.c lib.c list.c listing.c ll.c macro.c process.c report.c section.c symbol.c vector.c
+
+ifeq ($(OS), Windows_NT)
+all: sasm.exe
+
+sasm.exe: $(CSRC)
+	$(CC) $(CFLAGS) -o $@ $^
+else
+all: sasm
+
+sasm: $(CSRC)
+	$(CC) $(CFLAGS) -o $@ $^
+endif
+
+clean:
+
+	if [ -f sasm ]; then rm -rf sasm; fi
+	if [ -f sasm.exe ]; then rm -rf sasm.exe; fi
