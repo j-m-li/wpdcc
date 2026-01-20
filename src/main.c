@@ -85,7 +85,10 @@ static void compile(char *file, char *def) {
 		cmderror("cannot create tmpfile", NULL);
 	}
 	if (file) {
-		ofile = newfilename(file, 's');
+		if (O_asmonly && O_outfile)
+			ofile = O_outfile;
+		else 
+			ofile = newfilename(file, 's');
 		if ((in = fopen(file, "r")) == NULL)
 			cmderror("no such file: %s", file);
 		if (!O_testonly) {
