@@ -14,82 +14,13 @@ void cgprelude(void)	{ }
 void cgpostlude(void)	{ }
 void cgpublic(char *s)	{ ngen(".globl\t%s", s, 0); }
 
-void cgsynth(char *op) {
-	int	n;
-	char	*s;
-
-	n = Q_val;
-	s = gsym(Q_name);
-	switch (Q_type) {
-	case addr_auto:		ngen("%s\t%d(%%ebp),%%ecx", "leal", n);
-				sgen("%s\t%s,%%eax", op, "%ecx");
-				break;
-	case array_auto:	ngen("%s\t%d(%%ebp),%%ecx", "leal", n);
-				sgen("%s\t%s,%%eax", op, "%ecx");
-				break;
-	case addr_static:	lgen("%s\t$%c%d,%%eax", op, n); break;
-	case addr_globl:	sgen("%s\t$%s,%%eax", op, s); break;
-	case addr_label:	lgen("%s\t$%c%d,%%eax", op, n); break;
-	case literal: 		ngen("%s\t$%d,%%eax", op, n); break;
-	case auto_word:		ngen("%s\t%d(%%ebp),%%eax", op, n); break;
-	case static_word:	lgen("%s\t%c%d,%%eax", op, n); break;
-	case globl_word:	sgen("%s\t%s,%%eax", op, s); break;
-	case auto_char:
-	case static_char:
-	case globl_char:
-	case auto_byte:
-	case static_byte:
-	case globl_byte:	cgload2();
-				ngen("%s\t%%ecx,%%eax", op, 0);
-				break;
-	case empty:		cgpop2();
-				sgen("%s\t%s,%%eax", op, "%ecx");
-				break;
-	default:		fatal("internal: bad type in cgsynth()");
-	}
-	Q_type = empty;
-}
-
 int cgload2(void) {
-	int	n, q;
-	char	*s, *op, *opb, *opc;
-
-	op = "movl";
-	opb = "movb";
-	opc = "movsxb";
-	n = Q_val;
-	s = gsym(Q_name);
-	switch (Q_type) {
-	case addr_auto:		ngen("%s\t%d(%%ebp),%%ecx", "leal", n);
-				break;
-	case array_auto:	ngen("%s\t%d(%%ebp),%%ecx", "leal", n);
-				break;
-	case addr_static:	lgen("%s\t$%c%d,%%ecx", op, n); break;
-	case addr_globl:	sgen("%s\t$%s,%%ecx", op, s); break;
-	case addr_label:	lgen("%s\t$%c%d,%%ecx", op, n); break;
-	case literal: 		ngen("%s\t$%d,%%ecx", op, n); break;
-	case auto_byte:		cgclear2();
-				ngen("%s\t%d(%%ebp),%%cl", opb, n);
-				break;
-	case auto_char:		ngen("%s\t%d(%%ebp),%%ecx", opc, n); break;
-	case auto_word:		ngen("%s\t%d(%%ebp),%%ecx", op, n); break;
-	case static_byte:	cgclear2();
-				lgen("%s\t%c%d,%%cl", opb, n); break;
-				break;
-	case static_char:	lgen("%s\t%c%d,%%ecx", opc, n); break;
-	case static_word:	lgen("%s\t%c%d,%%ecx", op, n); break;
-	case globl_byte:	cgclear2();
-				sgen("%s\t%s,%%cl", opb, s); break;
-				break;
-	case globl_char:	sgen("%s\t%s,%%ecx", opc, s); break;
-	case globl_word:	sgen("%s\t%s,%%ecx", op, s); break;
-	case empty:		cgpop2();
-				break;
-	default:		fatal("internal: bad type in cgload2()");
+	cgpop2();
+	if (Q_type != empty) {
+		Q_type = empty;
+		return 0;
 	}
-	q = Q_type;
-	Q_type = empty;
-	return empty == q;
+	return 1;
 }
 
 void cglit(int v)	{ ngen("%s\t$%d,%%eax", "movl", v); }
@@ -122,9 +53,12 @@ void cgswap(void)	{ gen("xchgl\t%eax,%ecx"); }
 void cgswap3(int d)	{ if (d) gen("movl\t%eax,-4(%ebp)");
 			  else gen("movl\t-4(%ebp),%eax"); }
 
-void cgand(void)	{ cgsynth("andl"); }
-void cgior(void)	{ cgsynth("orl"); }
-void cgxor(void)	{ cgsynth("xorl"); }
+void cgand(void)	{ cgpop2();
+			  sgen("%s\t%s,%%eax", "andl", "%ecx"); }
+void cgior(void)	{ cgpop2();
+			  sgen("%s\t%s,%%eax", "orl", "%ecx"); }
+void cgxor(void)	{ cgpop2();
+			  sgen("%s\t%s,%%eax", "xorl", "%ecx"); }
 void cgadd(void)	{ gen("addl\t%ecx,%eax"); }
 void cgmul(void)	{ gen("imull\t%ecx,%eax"); }
 void cgsub(void)	{ gen("subl\t%ecx,%eax"); }
@@ -143,13 +77,8 @@ void cgshru(void)	{ gen("shrl\t%cl,%eax"); }
 void cgcmp(char *inst)	{ int lab;
 			  lab = label();
 			  gen("xorl\t%edx,%edx");
-			  if (empty == Q_type) {
-				cgpop2();
-				gen("cmpl\t%eax,%ecx");
-			  }
-			  else {
-				cgsynth("cmpl");
-			  }
+			  cgpop2();
+			  gen("cmpl\t%eax,%ecx");
 			  lgen("%s\t%c%d", inst, lab);
 			  gen("incl\t%edx");
 			  genlab(lab);
@@ -167,13 +96,8 @@ void cguge()		{ cgcmp("jb"); }
 
 void cgbrcond(char *i, int n)	{ int lab;
 				  lab = label();
-				  if (empty == Q_type) {
-					cgpop2();
-					gen("cmpl\t%eax,%ecx");
-				  }
-				  else {
-					cgsynth("cmpl");
-				  }
+				  cgpop2();
+				  gen("cmpl\t%eax,%ecx");
 				  lgen("%s\t%c%d", i, lab);
 				  lgen("%s\t%c%d", "jmp", n);
 				  genlab(lab); }
