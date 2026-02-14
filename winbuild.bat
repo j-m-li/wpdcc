@@ -28,7 +28,7 @@ copy targets\lib\init-windows.c lib\init.c
 copy targets\lib\system-windows.c lib\system.c
 copy targets\cg\cg386.c cg.c
 copy targets\cg\cg386.h cg.h
-copy targets\windows-386\sys-windows-386.h sys.h
+copy targets\windows-386\sys-windows-mingw.h sys.h
 copy targets\windows-386\crt0-windows-386.s lib\crt0.s
 copy targets\include\limits-32.h include\limits.h
 

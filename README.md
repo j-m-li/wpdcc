@@ -54,12 +54,6 @@ Includes these modifications : https://github.com/googlielmo/subc
 ./configure -m i386 -s Linux
 cd src
 make install
-make web
 
 ```
-
-
-
-https://web.njit.edu/~rosensta/classes/architecture/252software/code.pdf
-http://goldencrystal.free.fr/M68kOpcodes-v2.3.pdf
 

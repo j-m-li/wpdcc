@@ -168,6 +168,15 @@ int _unlink(char *path) {
 	return 0;
 }
 
+int _rmdir(char *path) {
+	int	ret;
+
+	ret = RemoveDirectoryA(path);
+	if (ret == 0) return -1;
+	return 0;
+}
+
+
 int _creat(char *path, int mode) {
 	int	ret;
 	int	fd = 0;

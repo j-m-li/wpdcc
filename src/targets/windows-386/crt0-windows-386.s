@@ -94,8 +94,8 @@ CGetSystemTime:
 	call	_GetSystemTime@4	
 	ret
 
-	.globl	CSystemTimeToFile
-CSystemTimeToFile:
+	.globl	CSystemTimeToFileTime
+CSystemTimeToFileTime:
 	pushl	8(%esp)
 	pushl	8(%esp)
 	call	_SystemTimeToFileTime@8	
@@ -197,21 +197,28 @@ CDeleteFileA:
 	call	_DeleteFileA@4	
 	ret
 
+	.globl	CRemoveDirectoryA
+CRemoveDirectoryA:
+	pushl	4(%esp)
+	call	_RemoveDirectoryA@4	
+	ret
+
+
 	.globl	CCloseHandle
 CCloseHandle:
 	pushl	4(%esp)
 	call	_CloseHandle@4	
 	ret
 
-	.globl	CGetExitCodeProce
-CGetExitCodeProce:
+	.globl	CGetExitCodeProcess
+CGetExitCodeProcess:
 	pushl	8(%esp)
 	pushl	8(%esp)
 	call	_GetExitCodeProcess@8	
 	ret
 
-	.globl	CWaitForSingleObj
-CWaitForSingleObj:
+	.globl	CWaitForSingleObject
+CWaitForSingleObject:
 	pushl	8(%esp)
 	pushl	8(%esp)
 	call	_WaitForSingleObject@8	

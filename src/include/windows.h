@@ -89,6 +89,10 @@ EXPORT int __stdcall DeleteFileA(
 	char *lpFileName
 );
 
+EXPORT int __stdcall RemoveDirectoryA(
+	char *lpFileName
+);
+
 EXPORT int __stdcall WriteFile(
 	void *hFile,
 	void *lpBuffer,
